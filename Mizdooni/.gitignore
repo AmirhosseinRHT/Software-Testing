@@ -16,3 +16,4 @@ elastic-apm-agent-*.jar
 *.iws
 *.iml
 *.ipr
+*~
