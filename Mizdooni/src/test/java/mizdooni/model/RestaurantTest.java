@@ -76,7 +76,8 @@ class RestaurantTest {
         tablesToAdd.forEach(restaurant::addTable);
         assertEquals(expectedSize, restaurant.getTables().size());
         if (lastAddedTable != null) {
-            Table lastTableInRestaurant = restaurant.getTables().getLast();
+            int tablesCount  = restaurant.getTables().size();
+            Table lastTableInRestaurant = restaurant.getTables().get(tablesCount-1);
             assertEquals(lastAddedTable.getTableNumber(), lastTableInRestaurant.getTableNumber());
             assertEquals(lastAddedTable.getSeatsNumber(), lastTableInRestaurant.getSeatsNumber());
         }
@@ -115,12 +116,12 @@ class RestaurantTest {
 
         restaurant.addReview(review1);
         assertEquals(1, restaurant.getReviews().size());
-        assertEquals(review1, restaurant.getReviews().getFirst());
+        assertEquals(review1, restaurant.getReviews().get(0));
         Review review2 = new Review(user, new Rating(), "Excellent service!", now);
         restaurant.addReview(review2);
 
         assertEquals(1, restaurant.getReviews().size());
-        assertEquals(review2, restaurant.getReviews().getFirst());
+        assertEquals(review2, restaurant.getReviews().get(0));
     }
 
     @ParameterizedTest
