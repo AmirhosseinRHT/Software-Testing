@@ -37,12 +37,12 @@ public class Restaurant {
         return tables.stream().filter(t -> t.getTableNumber() == tableNumber).findFirst().orElse(null);
     }
 
-    public void addTable(Table table) {
+    synchronized public void addTable(Table table) {
         table.setTableNumber(tables.size() + 1);
         tables.add(table);
     }
 
-    public void addReview(Review review) {
+    synchronized public void addReview(Review review) {
         for (Review r : reviews) {
             if (r.getUser().equals(review.getUser())) {
                 reviews.remove(r);
@@ -77,7 +77,7 @@ public class Restaurant {
     }
 
     public int getMaxSeatsNumber() {
-        return tables.stream().map(Table::getSeatsNumber).max(Integer::compareTo).orElse(1);
+        return tables.stream().map(Table::getSeatsNumber).max(Integer::compareTo).orElse(0);
     }
 
     public List<Table> getTables() {
