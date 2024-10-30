@@ -57,6 +57,9 @@ public class User {
     }
 
     public boolean checkPassword(String pass) {
+        if (pass == null) {
+            throw new NullPointerException();
+        }
         return password.equals(pass);
     }
 
