@@ -1,10 +1,11 @@
 package mizdooni.controllers;
 
 
-import mizdooni.exceptions.RestaurantNotFound;
+import mizdooni.exceptions.*;
 import mizdooni.model.*;
 import mizdooni.response.PagedList;
 import mizdooni.response.Response;
+import mizdooni.response.ResponseException;
 import mizdooni.service.RestaurantService;
 import mizdooni.service.ReviewService;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,12 +24,15 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ReviewControllerTest {
 
     private int restaurantId;
+    private String testComment;
     @InjectMocks
     private ReviewController reviewController;
 
@@ -55,6 +59,7 @@ public class ReviewControllerTest {
         rating1 = makeRating(3.0, 4.0, 2.0, 4.5);
         rating2 = makeRating(3.5, 4.0, 3.0, 4.6);
         makeRestaurant();
+        testComment = "test comment";
     }
 
     private Rating makeRating(double food, double ambiance, double service, double overall) {
@@ -103,16 +108,31 @@ public class ReviewControllerTest {
     }
 
     @Test
-    @DisplayName("Test get Review for an invalid restaurant")
-    public void testAddReviewValidRestaurant() throws RestaurantNotFound {
-        when(restaurantService.getRestaurant(restaurantId)).thenReturn(null);
-        Response response = reviewController.getReviews(restaurantId, 1);
+    @DisplayName("Test add Review for an valid restaurant")
+    public void testAddReviewValidRestaurant()
+            throws RestaurantNotFound, UserNotFound, ManagerCannotReview, UserHasNotReserved, InvalidReviewRating {
+        when(restaurantService.getRestaurant(restaurantId)).thenReturn(restaurant);
+        doNothing().when(reviewService).addReview(restaurantId, rating1, testComment);
+        Response response = reviewController.addReview(restaurantId, makeRequestParamReview(rating1, testComment));
         assertEquals(HttpStatus.OK, response.getStatus());
-        assertEquals("restaurant not found", response.getMessage());
+        assertEquals("review added successfully", response.getMessage());
+    }
+
+    @Test
+    @DisplayName("Test add Review for an invalid restaurant")
+    public void testAddReviewInvalidRestaurant()
+            throws RestaurantNotFound, UserNotFound, ManagerCannotReview, UserHasNotReserved, InvalidReviewRating {
+        when(restaurantService.getRestaurant(restaurantId)).thenReturn(null);
+        doNothing().when(reviewService).addReview(restaurantId, rating1, testComment);
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
+            reviewController.addReview(restaurantId, makeRequestParamReview(rating1, testComment));
+        });
+        assertEquals(.OK, response.getStatus());
+        assertEquals("review added successfully", response.getMessage());
     }
     private Map<String, Object> makeRequestParamReview(Rating r, String comment){
         Map<String, Object> req = new HashMap<>();
-        Map<String, Object> ratingMap = new HashMap<>();
+        Map<String, Number> ratingMap = new HashMap<>();
         ratingMap.put("food", r.food);
         ratingMap.put("service", r.service);
         ratingMap.put("ambiance", r.ambiance);
