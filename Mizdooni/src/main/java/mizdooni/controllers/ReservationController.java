@@ -33,6 +33,8 @@ public class ReservationController {
         ControllerUtils.checkRestaurant(restaurantId, restaurantService);
         LocalDate localDate = null;
         try {
+            if(restaurantId < 1 || table < 1)
+                throw new Exception();
             localDate = LocalDate.parse(date, DATE_FORMATTER);
         } catch (Exception ex) {
             throw new ResponseException(HttpStatus.BAD_REQUEST, PARAMS_BAD_TYPE);
@@ -48,6 +50,8 @@ public class ReservationController {
     @GetMapping("/reserves/customer/{customerId}")
     public Response getCustomerReservations(@PathVariable int customerId) {
         try {
+            if(customerId < 1)
+                throw new Exception();
             List<Reservation> reservations = reserveService.getCustomerReservations(customerId);
             return Response.ok("user reservations", reservations);
         } catch (Exception ex) {
@@ -62,6 +66,8 @@ public class ReservationController {
         ControllerUtils.checkRestaurant(restaurantId, restaurantService);
         LocalDate localDate;
         try {
+            if(people < 1 || restaurantId < 1)
+                throw new Exception();
             localDate = LocalDate.parse(date, DATE_FORMATTER);
         } catch (Exception ex) {
             throw new ResponseException(HttpStatus.BAD_REQUEST, PARAMS_BAD_TYPE);
@@ -88,6 +94,8 @@ public class ReservationController {
         try {
             people = Integer.parseInt(params.get("people"));
             datetime = LocalDateTime.parse(params.get("datetime"), DATETIME_FORMATTER);
+            if(people < 1 || restaurantId < 1)
+                throw new Exception();
         } catch (Exception ex) {
             throw new ResponseException(HttpStatus.BAD_REQUEST, PARAMS_BAD_TYPE);
         }
@@ -103,6 +111,8 @@ public class ReservationController {
     @PostMapping("/reserves/cancel/{reservationNumber}")
     public Response cancelReservation(@PathVariable int reservationNumber) {
         try {
+            if(reservationNumber < 1)
+                throw new Exception();
             reserveService.cancelReservation(reservationNumber);
             return Response.ok("reservation cancelled");
         } catch (Exception ex) {
