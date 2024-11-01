@@ -1,18 +1,26 @@
 package mizdooni.controllers;
 
+import static mizdooni.controllers.ControllerUtils.PARAMS_BAD_TYPE;
 import static mizdooni.controllers.ControllerUtils.PARAMS_MISSING;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.stream.Stream;
+import mizdooni.exceptions.DuplicatedUsernameEmail;
+import mizdooni.exceptions.InvalidEmailFormat;
+import mizdooni.exceptions.InvalidUsernameFormat;
 import mizdooni.model.Address;
 import mizdooni.model.User;
 import mizdooni.response.Response;
 import mizdooni.response.ResponseException;
-import mizdooni.service.ServiceUtils;
 import mizdooni.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,10 +42,6 @@ public class AuthenticationControllerTest {
     @Mock
     private UserService userService;
 
-//    @BeforeEach
-//    public void setUp() {
-//    }
-
     private static Stream<Arguments> provideLoginArgs() {
         return Stream.of(
             Arguments.of(Map.of("username", "person","password1", "123")),
@@ -52,7 +56,7 @@ public class AuthenticationControllerTest {
     @DisplayName("Test fetching current user when logged in")
     public void testGetCurrentUserWhenLoggedIn() {
         Address mockAddress = new Address("Iran","Tehran", "Kargar");
-        User mockUser = new User("username", "password", "email@example.com", mockAddress, User.Role.client);
+        User mockUser = new User("username", "password", "email@gmail.com", mockAddress, User.Role.client);
         when(userService.getCurrentUser()).thenReturn(mockUser);
         Response response = authController.user();
         assertEquals(HttpStatus.OK, response.getStatus());
@@ -128,15 +132,10 @@ public class AuthenticationControllerTest {
     @Test
     @DisplayName("Test invalid username format")
     public void testInvalidUsernameFormat() {
-        // Arrange
-        String invalidUsername = "invalid username!";  // Assuming this format is invalid
-        when(ServiceUtils.validateUsername(invalidUsername)).thenReturn(false);
-
-        // Act & Assert
+        String invalidUsername = "username!";
         ResponseException exception = assertThrows(ResponseException.class, () -> {
             authController.validateUsername(invalidUsername);
         });
-
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         assertEquals("invalid username format", exception.getMessage());
     }
@@ -194,5 +193,178 @@ public class AuthenticationControllerTest {
         Response response = authController.validateEmail(newEmail);
         assertEquals(HttpStatus.OK, response.getStatus());
         assertEquals("email not registered", response.getMessage());
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    @Test
+    @DisplayName("Test missing parameters for signup")
+    public void testSignupMissingParameters() {
+        Map<String, Object> incompleteParams = Map.of("username", "testUser");
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
+            authController.signup(incompleteParams);
+        });
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals(PARAMS_MISSING, exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Test incorrect parameter types for signup")
+    public void testSignupIncorrectParameterTypes() {
+        Map<String, Object> invalidParams = Map.of(
+            "username", "testUser",
+            "password", 12345,
+            "email", "test@gmail.com",
+            "role", "client",
+            "address", Map.of("country", "Country", "city", "City")
+        );
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
+            authController.signup(invalidParams);
+        });
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals(PARAMS_BAD_TYPE, exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Test invalid data values for signup")
+    public void testSignupInvalidDataValues() {
+        Map<String, Object> invalidValues = Map.of(
+            "username", "testUser",
+            "password", "",
+            "email", "test@gmail.com",
+            "role", "client",
+            "address", Map.of("country", "Country", "city", "City")
+        );
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
+            authController.signup(invalidValues);
+        });
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals(PARAMS_MISSING, exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Test successful signup")
+    public void testSignupSuccess()
+        throws DuplicatedUsernameEmail, InvalidUsernameFormat, InvalidEmailFormat {
+        Map<String, Object> validParams = Map.of(
+            "username", "testUser",
+            "password", "aGoodPass",
+            "email", "test@gmail.com",
+            "role", "client",
+            "address", Map.of("country", "Country", "city", "City")
+        );
+        User mockUser = new User("testUser", "aGoodPass", "test@gmail.com"
+            , new Address("Country", "City", null), User.Role.client);
+        doNothing().when(userService).signup(anyString(), anyString(), anyString(), any(Address.class), any(User.Role.class));
+        doReturn(true).when(userService).login("testUser", "aGoodPass");
+        doReturn(mockUser).when(userService).getCurrentUser();
+
+        Response response = authController.signup(validParams);
+
+        assertEquals(HttpStatus.OK, response.getStatus());
+        assertEquals("signup successful", response.getMessage());
+        assertEquals(mockUser, response.getData());
+    }
+
+    @Test
+    @DisplayName("Test duplicate username for signup")
+    public void testSignupDuplicateUsername()
+        throws DuplicatedUsernameEmail, InvalidUsernameFormat, InvalidEmailFormat {
+        Map<String, Object> paramsWithDuplicateUsername = Map.of(
+            "username", "existingUser",
+            "password", "securePassword",
+            "email", "newemail@example.com",
+            "role", "client",
+            "address", Map.of("country", "Country", "city", "City")
+        );
+        doThrow(new ResponseException(HttpStatus.CONFLICT, "username already exists"))
+            .when(userService).signup(eq("existingUser"), anyString(), anyString(), any(Address.class), any(User.Role.class));
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
+            authController.signup(paramsWithDuplicateUsername);
+        });
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("username already exists", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Test invalid email format for signup")
+    public void testSignupInvalidEmailFormat()
+        throws DuplicatedUsernameEmail, InvalidUsernameFormat, InvalidEmailFormat {
+        Map<String, Object> paramsWithInvalidEmail = Map.of(
+            "username", "newUser",
+            "password", "securePassword",
+            "email", "invalidEmail",
+            "role", "client",
+            "address", Map.of("country", "Country", "city", "City")
+        );
+
+        doThrow(new ResponseException(HttpStatus.BAD_REQUEST, "invalid email format"))
+            .when(userService).signup(anyString(), anyString(), eq("invalidEmail"), any(Address.class), any(User.Role.class));
+
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
+            authController.signup(paramsWithInvalidEmail);
+        });
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("invalid email format", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Test unsupported role for signup")
+    public void testSignupUnsupportedRole() {
+        Map<String, Object> paramsWithUnsupportedRole = Map.of(
+            "username", "newUser",
+            "password", "securePassword",
+            "email", "newuser@gmail.com",
+            "role", "admin",
+            "address", Map.of("country", "Country", "city", "City")
+        );
+
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
+            authController.signup(paramsWithUnsupportedRole);
+        });
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals(PARAMS_BAD_TYPE, exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Test service exception during signup")
+    public void testSignupServiceException()
+        throws DuplicatedUsernameEmail, InvalidUsernameFormat, InvalidEmailFormat {
+        Map<String, Object> validParams = Map.of(
+            "username", "newUser",
+            "password", "securePassword",
+            "email", "newuser@gmail.com",
+            "role", "client",
+            "address", Map.of("country", "Country", "city", "City")
+        );
+        doThrow(new RuntimeException("Service failure")).when(userService).signup(anyString(), anyString(), anyString(), any(Address.class), any(User.Role.class));
+
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
+            authController.signup(validParams);
+        });
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Service failure", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Test service exception during login after signup")
+    public void testSignupLoginServiceException()
+        throws DuplicatedUsernameEmail, InvalidUsernameFormat, InvalidEmailFormat {
+        Map<String, Object> validParams = Map.of(
+            "username", "newUser",
+            "password", "securePassword",
+            "email", "newuser@gmail.com",
+            "role", "client",
+            "address", Map.of("country", "Country", "city", "City")
+        );
+        doNothing().when(userService).signup(anyString(), anyString(), anyString(), any(Address.class), any(User.Role.class));
+        doThrow(new RuntimeException("Login error")).when(userService).login("newUser", "securePassword");
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
+            authController.signup(validParams);
+        });
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Login error", exception.getMessage());
     }
 }
