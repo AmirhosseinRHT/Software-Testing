@@ -12,6 +12,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,7 +43,6 @@ public class ReviewControllerTest {
     RestaurantService restaurantService;
 
     @Mock
-
     ReviewService reviewService;
 
     private Restaurant restaurant;
@@ -127,8 +129,27 @@ public class ReviewControllerTest {
         ResponseException exception = assertThrows(ResponseException.class, () -> {
             reviewController.addReview(restaurantId, makeRequestParamReview(rating1, testComment));
         });
-        assertEquals(.OK, response.getStatus());
-        assertEquals("review added successfully", response.getMessage());
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+        assertEquals("restaurant not found", exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "comment",
+            "rating"
+    })
+    @DisplayName("Test add Review with an invalid parameter")
+    public void testAddReviewWithInvalidParam(String key)
+            throws RestaurantNotFound, UserNotFound, ManagerCannotReview, UserHasNotReserved, InvalidReviewRating {
+        when(restaurantService.getRestaurant(restaurantId)).thenReturn(restaurant);
+        doNothing().when(reviewService).addReview(restaurantId, rating1, testComment);
+        var reqParam = makeRequestParamReview(rating1, testComment);
+        reqParam.remove(key);
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
+            reviewController.addReview(restaurantId, reqParam);
+        });
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals(ControllerUtils.PARAMS_MISSING, exception.getMessage());
     }
     private Map<String, Object> makeRequestParamReview(Rating r, String comment){
         Map<String, Object> req = new HashMap<>();
