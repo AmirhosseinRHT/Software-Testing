@@ -1,5 +1,6 @@
 package mizdooni.controllers;
 
+import mizdooni.exceptions.RestaurantNotFound;
 import mizdooni.model.Rating;
 import mizdooni.model.Restaurant;
 import mizdooni.model.Review;
@@ -26,12 +27,15 @@ class ReviewController {
 
     @GetMapping("/reviews/{restaurantId}")
     public Response getReviews(@PathVariable int restaurantId, @RequestParam int page) {
-        Restaurant restaurant = ControllerUtils.checkRestaurant(restaurantId, restaurantService);
         try {
+            //fix bug change location of this line into try
+            Restaurant restaurant = ControllerUtils.checkRestaurant(restaurantId, restaurantService);
             PagedList<Review> reviews = reviewService.getReviews(restaurant.getId(), page);
             String message = "reviews for restaurant (" + restaurantId + "): " + restaurant.getName();
             return Response.ok(message, reviews);
-        } catch (Exception ex) {
+        }catch (ResponseException ex){
+            return Response.ok("restaurant not found");
+        }catch (Exception ex) {
             throw new ResponseException(HttpStatus.BAD_REQUEST, ex);
         }
     }
