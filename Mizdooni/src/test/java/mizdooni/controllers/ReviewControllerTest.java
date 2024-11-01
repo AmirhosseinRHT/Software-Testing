@@ -28,6 +28,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -64,6 +65,19 @@ public class ReviewControllerTest {
         testComment = "test comment";
     }
 
+
+    private Map<String, Object> makeRequestParamReview(Rating r, String comment){
+        Map<String, Object> req = new HashMap<>();
+        Map<String, Number> ratingMap = new HashMap<>();
+        ratingMap.put("food", r.food);
+        ratingMap.put("service", r.service);
+        ratingMap.put("ambiance", r.ambiance);
+        ratingMap.put("overall", r.overall);
+        req.put("rating", ratingMap);
+        req.put("comment", comment);
+        return req;
+    }
+
     private Rating makeRating(double food, double ambiance, double service, double overall) {
         Rating rating =new Rating();
         rating.food = food;
@@ -85,8 +99,19 @@ public class ReviewControllerTest {
         return new PagedList<>(restaurant.getReviews(), page, 5);
     }
 
+    @ParameterizedTest
+    @CsvSource({
+        "1, -1",
+        "-1, 0",
+        "1, -1",
+    })
+    public void testGetReviewsWithInvalidParameters(int restaurantId, int page) {
+        ResponseException exception = assertThrows(ResponseException.class, () -> reviewController.getReviews(restaurantId,page));
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+    }
+
     @Test
-    @DisplayName("Test get Review for an valid restaurant")
+    @DisplayName("Test get Review for a valid restaurant")
     public void testGetReviewsValidRestaurant() throws RestaurantNotFound {
         when(restaurantService.getRestaurant(restaurantId)).thenReturn(restaurant);
         when(reviewService.getReviews(restaurantId, 1)).thenReturn(makeReviewPagedList(1));
@@ -102,7 +127,7 @@ public class ReviewControllerTest {
 
     @Test
     @DisplayName("Test get Review for an invalid restaurant")
-    public void testGetReviewsInvalidRestaurant() throws RestaurantNotFound {
+    public void testGetReviewsInvalidRestaurant(){
         when(restaurantService.getRestaurant(restaurantId)).thenReturn(null);
         Response response = reviewController.getReviews(restaurantId, 1);
         assertEquals(HttpStatus.OK, response.getStatus());
@@ -122,10 +147,8 @@ public class ReviewControllerTest {
 
     @Test
     @DisplayName("Test add Review for an invalid restaurant")
-    public void testAddReviewInvalidRestaurant()
-            throws RestaurantNotFound, UserNotFound, ManagerCannotReview, UserHasNotReserved, InvalidReviewRating {
+    public void testAddReviewInvalidRestaurant() {
         when(restaurantService.getRestaurant(restaurantId)).thenReturn(null);
-        doNothing().when(reviewService).addReview(restaurantId, rating1, testComment);
         ResponseException exception = assertThrows(ResponseException.class, () -> {
             reviewController.addReview(restaurantId, makeRequestParamReview(rating1, testComment));
         });
@@ -139,10 +162,8 @@ public class ReviewControllerTest {
             "rating"
     })
     @DisplayName("Test add Review with an invalid parameter")
-    public void testAddReviewWithInvalidParam(String key)
-            throws RestaurantNotFound, UserNotFound, ManagerCannotReview, UserHasNotReserved, InvalidReviewRating {
+    public void testAddReviewWithInvalidParam(String key) {
         when(restaurantService.getRestaurant(restaurantId)).thenReturn(restaurant);
-        doNothing().when(reviewService).addReview(restaurantId, rating1, testComment);
         var reqParam = makeRequestParamReview(rating1, testComment);
         reqParam.remove(key);
         ResponseException exception = assertThrows(ResponseException.class, () -> {
@@ -151,15 +172,5 @@ public class ReviewControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         assertEquals(ControllerUtils.PARAMS_MISSING, exception.getMessage());
     }
-    private Map<String, Object> makeRequestParamReview(Rating r, String comment){
-        Map<String, Object> req = new HashMap<>();
-        Map<String, Number> ratingMap = new HashMap<>();
-        ratingMap.put("food", r.food);
-        ratingMap.put("service", r.service);
-        ratingMap.put("ambiance", r.ambiance);
-        ratingMap.put("overall", r.overall);
-        req.put("rating", ratingMap);
-        req.put("comment", comment);
-        return req;
-    }
+
 }

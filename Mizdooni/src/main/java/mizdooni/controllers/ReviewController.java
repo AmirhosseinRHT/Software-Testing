@@ -28,7 +28,8 @@ class ReviewController {
     @GetMapping("/reviews/{restaurantId}")
     public Response getReviews(@PathVariable int restaurantId, @RequestParam int page) {
         try {
-            //fix bug change location of this line into try
+            if(restaurantId < 1 || page < 0)
+                throw new Exception();
             Restaurant restaurant = ControllerUtils.checkRestaurant(restaurantId, restaurantService);
             PagedList<Review> reviews = reviewService.getReviews(restaurant.getId(), page);
             String message = "reviews for restaurant (" + restaurantId + "): " + restaurant.getName();
@@ -42,6 +43,8 @@ class ReviewController {
 
     @PostMapping("/reviews/{restaurantId}")
     public Response addReview(@PathVariable int restaurantId, @RequestBody Map<String, Object> params) {
+        if(restaurantId < 1)
+            throw new ResponseException(HttpStatus.BAD_REQUEST, PARAMS_BAD_TYPE);
         ControllerUtils.checkRestaurant(restaurantId, restaurantService);
         if (!ControllerUtils.containsKeys(params, "comment", "rating")) {
             throw new ResponseException(HttpStatus.BAD_REQUEST, PARAMS_MISSING);
