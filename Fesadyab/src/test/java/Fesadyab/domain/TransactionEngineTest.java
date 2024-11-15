@@ -2,6 +2,7 @@ package Fesadyab.domain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class TransactionEngineTest {
 
@@ -34,6 +35,22 @@ public class TransactionEngineTest {
     }
 
     @Test
+    void testCompareTwoTransactionWithDifferentTransactionId() {
+        Transaction t1 = createTransaction(1, 1234, 100, false);
+        Transaction t2 = createTransaction(1, 1235, 100, false);
+        boolean isEqual = t1.equals(t2);
+        assertFalse(isEqual);
+    }
+
+    @Test
+    void testCompareTransactionWithAnotherObject() {
+        Transaction t1 = createTransaction(1, 1234, 100, false);
+        Object obj = new Object();
+        boolean isEqual = t1.equals(obj);
+        assertFalse(isEqual);
+    }
+
+    @Test
     void testAddRedundantTransaction() {
         Transaction t1 = createTransaction(20, 101, 200, true);
         Transaction t2 = createTransaction(10, 101, 100, false);
@@ -56,4 +73,6 @@ public class TransactionEngineTest {
         int result = transactionEngine.addTransactionAndDetectFraud(transactionWithNewAccountId);
         assertEquals(0,result);
     }
+
+
 }
