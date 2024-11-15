@@ -7,6 +7,7 @@ import org.junit.jupiter.api.TestInstance;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TransactionEngineTest {
@@ -37,6 +38,14 @@ class TransactionEngineTest {
     void setup() {
         transactionEngine = new TransactionEngine();
         transactionEngine.transactionHistory.addAll(List.of(transaction1, transaction2, transaction3, transaction4 , transaction5));
+    }
+
+    @Test
+    void testCompareTwoTransactionWithSameTransactionId() {
+        Transaction t1 = createTransaction(1, 1234, 100, false);
+        Transaction t2 = createTransaction(1, 1234, 100, false);
+        boolean isEqual = t1.equals(t2);
+        assertTrue(isEqual);
     }
 
     @Test
