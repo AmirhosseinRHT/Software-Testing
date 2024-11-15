@@ -1,4 +1,4 @@
-package domain;
+package Fesadyab.domain;
 
 import java.util.ArrayList;
 

@@ -1,4 +1,4 @@
-package domain;
+package Fesadyab.domain;
 
 import lombok.Getter;
 import lombok.Setter;
