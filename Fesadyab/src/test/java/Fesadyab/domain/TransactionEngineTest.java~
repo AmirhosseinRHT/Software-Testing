@@ -94,34 +94,6 @@ class TransactionEngineTest {
     }
 
     @Test
-    void testContinuousEqualDiffsInGetTransactionPatternAboveThreshold(){
-        Transaction t1 = createTransaction(transaction4.getAccountId(), 1234 , 1500, false);
-        Transaction t2 = createTransaction(transaction4.getAccountId(), 1235 , 2999, false);
-        Transaction t3 = createTransaction(transaction4.getAccountId(), 1236 , 4498, false);
-        Transaction t4 = createTransaction(transaction4.getAccountId(), 1237 , 5997, false);
-        int result1 = transactionEngine.addTransactionAndDetectFraud(t1);
-        int result2 = transactionEngine.addTransactionAndDetectFraud(t2);
-        int result3 = transactionEngine.addTransactionAndDetectFraud(t3);
-        int result4 = transactionEngine.addTransactionAndDetectFraud(t4);
-        assertEquals(0,result1);
-        assertEquals(1499,result2);
-        assertEquals(1499,result3);
-        assertEquals(0,result4);
-    }
-    @Test
-    void testContinuousInEqualDiffsInGetTransactionPatternAboveThreshold(){
-        Transaction t1 =  createTransaction(transaction4.getAccountId(), 1234 , 1500, false);
-        Transaction t2 = createTransaction(transaction4.getAccountId(), 1235 , 3200, false);
-        Transaction t3 = createTransaction(transaction4.getAccountId(), 1236 , 450, false);
-        int result1 = transactionEngine.addTransactionAndDetectFraud(t1);
-        int result2 = transactionEngine.addTransactionAndDetectFraud(t2);
-        int result3 = transactionEngine.addTransactionAndDetectFraud(t3);
-        assertEquals(0,result1);
-        assertEquals(1499,result2);
-        assertEquals(0,result3);
-    }
-
-    @Test
     void testAddNewTransactionWhenFraudIsNotZero(){
         Transaction t1 = createTransaction(transaction4.getAccountId() , 888, 1000, false);
         Transaction t2 = createTransaction(transaction4.getAccountId() , 999, 2000, false);
@@ -160,5 +132,31 @@ class TransactionEngineTest {
         assertEquals(0,result);
     }
 
-
+    @Test
+    void testContinuousEqualDiffsInGetTransactionPatternAboveThreshold(){
+        Transaction t1 = createTransaction(transaction4.getAccountId(), 1234 , 1500, false);
+        Transaction t2 = createTransaction(transaction4.getAccountId(), 1235 , 2999, false);
+        Transaction t3 = createTransaction(transaction4.getAccountId(), 1236 , 4498, false);
+        Transaction t4 = createTransaction(transaction4.getAccountId(), 1237 , 5997, false);
+        int result1 = transactionEngine.addTransactionAndDetectFraud(t1);
+        int result2 = transactionEngine.addTransactionAndDetectFraud(t2);
+        int result3 = transactionEngine.addTransactionAndDetectFraud(t3);
+        int result4 = transactionEngine.addTransactionAndDetectFraud(t4);
+        assertEquals(0,result1);
+        assertEquals(1499,result2);
+        assertEquals(1499,result3);
+        assertEquals(0,result4);
+    }
+    @Test
+    void testContinuousInEqualDiffsInGetTransactionPatternAboveThreshold(){
+        Transaction t1 =  createTransaction(transaction4.getAccountId(), 1234 , 1500, false);
+        Transaction t2 = createTransaction(transaction4.getAccountId(), 1235 , 3200, false);
+        Transaction t3 = createTransaction(transaction4.getAccountId(), 1236 , 450, false);
+        int result1 = transactionEngine.addTransactionAndDetectFraud(t1);
+        int result2 = transactionEngine.addTransactionAndDetectFraud(t2);
+        int result3 = transactionEngine.addTransactionAndDetectFraud(t3);
+        assertEquals(0,result1);
+        assertEquals(1499,result2);
+        assertEquals(0,result3);
+    }
 }
