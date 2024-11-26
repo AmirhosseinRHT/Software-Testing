@@ -26,6 +26,7 @@ class TableController {
     public Response getTables(@PathVariable int restaurantId) {
         ControllerUtils.checkRestaurant(restaurantId, restaurantService);
         try {
+            if(restaurantId < 1) throw new Exception();
             List<Table> tables = tableService.getTables(restaurantId);
             return Response.ok("tables listed", tables);
         } catch (Exception ex) {
@@ -42,7 +43,9 @@ class TableController {
 
         int seatsNumber;
         try {
-            seatsNumber = Integer.parseInt(params.get("seatNumber"));
+            seatsNumber = Integer.parseInt(params.get("seatsNumber"));
+            if(seatsNumber < 1 || restaurantId < 1)
+                throw new Exception();
         } catch (Exception ex) {
             throw new ResponseException(HttpStatus.BAD_REQUEST, PARAMS_BAD_TYPE);
         }
