@@ -25,6 +25,8 @@ class RestaurantController {
 
     @GetMapping("/restaurants/{restaurantId}")
     public Response getRestaurant(@PathVariable int restaurantId) {
+        if(restaurantId < 1)
+            throw new ResponseException(HttpStatus.BAD_REQUEST, "invalid restaurant id");
         Restaurant restaurant = ControllerUtils.checkRestaurant(restaurantId, restaurantService);
         return Response.ok("restaurant found", restaurant);
     }
@@ -42,6 +44,8 @@ class RestaurantController {
     @GetMapping("/restaurants/manager/{managerId}")
     public Response getManagerRestaurants(@PathVariable int managerId) {
         try {
+            if (managerId < 1)
+                throw new ResponseException(HttpStatus.BAD_REQUEST, "invalid manager id");
             List<Restaurant> restaurants = restaurantService.getManagerRestaurants(managerId);
             return Response.ok("manager restaurants listed", restaurants);
         } catch (Exception ex) {
@@ -87,10 +91,15 @@ class RestaurantController {
 
     @GetMapping("/validate/restaurant-name")
     public Response validateRestaurantName(@RequestParam("data") String name) {
-        if (restaurantService.restaurantExists(name)) {
-            throw new ResponseException(HttpStatus.CONFLICT, "restaurant name is taken");
+        try {
+            if (restaurantService.restaurantExists(name)) {
+                throw new Exception("restaurant name is taken");
+            }
+            return Response.ok("restaurant name is available");
+        } catch (Exception ex) {
+            throw new ResponseException(HttpStatus.BAD_REQUEST, ex.getMessage());
         }
-        return Response.ok("restaurant name is available");
+
     }
 
     @GetMapping("/restaurants/types")
