@@ -55,14 +55,14 @@ class TableControllerTest {
     @Test
     void when_tablesListIsNotNull_expect_returnTablesList() throws Exception {
         int restaurantId = 1;
-        List<Table> mockTables = Arrays.asList(table1 , table2);
+        List<Table> tables = Arrays.asList(table1 , table2);
         when(restaurantService.getRestaurant(restaurantId)).thenReturn(restaurant1);
-        when(tableService.getTables(restaurantId)).thenReturn(mockTables);
+        when(tableService.getTables(restaurantId)).thenReturn(tables);
         mockMvc.perform(get("/tables/{restaurantId}", restaurantId))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.message").value("tables listed"))
             .andExpect(jsonPath("$.data").isArray())
-            .andExpect(jsonPath("$.data.length()").value(mockTables.size()));
+            .andExpect(jsonPath("$.data.length()").value(tables.size()));
     }
 
     @Test
@@ -158,6 +158,6 @@ class TableControllerTest {
                 .contentType("application/json")
                 .content(requestBody))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message").value("parameters missing")); // Error adding table
+            .andExpect(jsonPath("$.message").value("parameters missing"));
     }
 }
