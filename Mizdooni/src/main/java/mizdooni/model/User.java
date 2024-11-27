@@ -1,6 +1,7 @@
 package mizdooni.model;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +41,11 @@ public class User {
     public boolean checkReserved(Restaurant restaurant) {
         return reservations.stream().anyMatch(r -> !r.isCancelled() &&
                 r.getDateTime().isBefore(LocalDateTime.now()) &&
-                r.getRestaurant().equals(restaurant));
+                r.getRestaurant().equals(restaurant) &&
+                r.getRestaurant().getStartTime()
+                    .isBefore(LocalTime.of(r.getDateTime().getHour() , r.getDateTime().getMinute()))
+                && r.getRestaurant().getEndTime()
+                .isAfter(LocalTime.of(r.getDateTime().getHour() , r.getDateTime().getMinute())));
     }
 
     public Reservation getReservation(int reservationNumber) {

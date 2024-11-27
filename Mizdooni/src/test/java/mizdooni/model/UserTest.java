@@ -64,7 +64,7 @@ class UserTest {
 
     @ParameterizedTest
     @CsvSource({
-        "2023-10-10T10:00:00, true",
+        "2023-10-10T10:00:00, false",
         "2023-10-10T15:00:00, true",
         "2023-10-10T23:00:00, false",
         "2023-10-10T08:00:00, false",
