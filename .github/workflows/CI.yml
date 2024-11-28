@@ -22,6 +22,10 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Run tests with Maven
+      - name: Run Mizdooni tests with Maven
         working-directory: Mizdooni
+        run: mvn -ntp test
+
+      - name: Run Fesadyab tests with Maven
+        working-directory: Fesadyab
         run: mvn -ntp test
