@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,8 +24,9 @@ jobs:
 
       - name: Run Fesadyab tests
         working-directory: Fesadyab
-        run: mvn -ntp test
+        run: mvn -B clean test
 
       - name: Run Mizdooni tests
         working-directory: Mizdooni
-        run: mvn -ntp test
+        run: mvn -B clean test
+        
