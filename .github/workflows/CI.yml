@@ -1,4 +1,4 @@
-name: Mizdooni Test
+name: Software Testing Project
 
 on:
   push:
@@ -22,10 +22,10 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Run Mizdooni tests with Maven
-        working-directory: Mizdooni
+      - name: Run Fesadyab tests
+        working-directory: Fesadyab
         run: mvn -ntp test
 
-      - name: Run Fesadyab tests with Maven
-        working-directory: Fesadyab
+      - name: Run Mizdooni tests
+        working-directory: Mizdooni
         run: mvn -ntp test
