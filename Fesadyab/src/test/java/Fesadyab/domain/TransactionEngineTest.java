@@ -9,7 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TransactionEngineTest {
+class TransactionEngineTest
+{
 
     TransactionEngine transactionEngine;
     Transaction transaction1 , transaction2 , transaction3 , transaction4 , transaction5;
