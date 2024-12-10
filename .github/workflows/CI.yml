@@ -24,7 +24,7 @@ jobs:
 
       - name: Run Fesadyab tests
         working-directory: Fesadyab
-        run: mvn test -f ./Fesadyab
+        run: mvn test
         # run: mvn -B clean test
         
       - name: Run Mizdooni tests
