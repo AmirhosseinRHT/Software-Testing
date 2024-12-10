@@ -23,12 +23,12 @@ jobs:
           cache: maven
 
       - name: Run Fesadyab tests
-        run: mvn test -f /home/runner/work/test/Fesadyab
-        # working-directory: Fesadyab
+        working-directory: Fesadyab
+        run: mvn test -f ./Fesadyab
         # run: mvn -B clean test
         
       - name: Run Mizdooni tests
-        run: mvn test -f /home/runner/work/test/Mizdooni
+        run: mvn test -f ./Mizdooni
 
         # working-directory: Mizdooni
         # run: mvn -B clean test
