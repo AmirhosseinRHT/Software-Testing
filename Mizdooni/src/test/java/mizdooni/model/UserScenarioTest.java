@@ -45,11 +45,6 @@ public class UserScenarioTest {
         reservation = new Reservation(user, restaurant, table1, LocalDateTime.parse(date + "T" + time));
     }
 
-    @Given("a reservation on {string} at {string} for iranian restaurant")
-    public void givenIranianRestaurantReservationForSpecificDateAndTime(String date, String time) {
-        reservation = new Reservation(user, iranianRestaurant, table1, LocalDateTime.parse(date + "T" + time));
-    }
-
     @When("I add the reservation for the user")
     public void whenIAddTheReservationForTheUser() {
         try {
@@ -59,16 +54,6 @@ public class UserScenarioTest {
             reservationAdded = false;
         }
     }
-
-//    @When("I try to add the reservation for the user")
-//    public void whenITryToAddTheReservationForTheUser() {
-//        try {
-//            user.addReservation(reservation);
-//            reservationAdded = true;
-//        } catch (Exception e) {
-//            reservationAdded = false;
-//        }
-//    }
 
     @When("I try to add a null reservation")
     public void whenITryToAddANullReservation() {
