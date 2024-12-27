@@ -12,18 +12,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @CucumberContextConfiguration
-public class UserScenarioTest {
+public class UserAndRestaurantScenarioTest {
 
     private User user;
-    private User user2;
     private Address address;
-    private Restaurant italianRestaurant;
-    private Restaurant iranianRestaurant;
     private Reservation reservation;
     private Restaurant restaurant;
     private boolean reservationAdded;
     private Table table1;
-    private Table table2;
     private Review review;
     private boolean submitedReview = false;
 
@@ -31,7 +27,7 @@ public class UserScenarioTest {
     public void givenUserWithRole(String username, String role) {
         User.Role userRole = User.Role.valueOf(role.toLowerCase());
         user = new User(username, "password123", "email@example.com",
-                new Address("temp", "temp", "temp"), userRole);
+                new Address("submittedReview", "temp", "temp"), userRole);
     }
 
     @Given("a restaurant {string} with available time slots")
