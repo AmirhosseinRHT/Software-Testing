@@ -1,9 +1,9 @@
-Feature: Add
+Feature: Add reservation
 
   Scenario: Successfully adding a reservation for a user
     Given a user named "Ali" with "client" role
     And a restaurant "Akbar joojeh" with available time slots
-    And a reservation on "2024-12-25" at "18:00"
+    And a review on "2024-12-25" at "18:00"
     When I add the reservation for the user
     Then the reservation should be added successfully
 

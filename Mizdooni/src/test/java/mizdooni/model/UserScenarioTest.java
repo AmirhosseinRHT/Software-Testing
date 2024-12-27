@@ -4,8 +4,6 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
-import mizdooni.MizdooniApplication;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -14,10 +12,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @CucumberContextConfiguration
-//@SpringBootTest(classes = MizdooniApplication.class)
 public class UserScenarioTest {
 
     private User user;
+    private User user2;
     private Address address;
     private Restaurant italianRestaurant;
     private Restaurant iranianRestaurant;
@@ -26,6 +24,8 @@ public class UserScenarioTest {
     private boolean reservationAdded;
     private Table table1;
     private Table table2;
+    private Review review;
+    private boolean submitedReview = false;
 
     @Given("a user named {string} with {string} role")
     public void givenUserWithRole(String username, String role) {
@@ -77,5 +77,64 @@ public class UserScenarioTest {
     public void thenTheReservationShouldNotBeAdded() {
         assertFalse(reservationAdded);
         assertEquals(0, user.getReservations().size());
+    }
+
+    @When("a review with rating food={double} service={double} ambiance={double} overall={double}")
+    public void reviewWithRatingFoodServiceAmbianceOverall(double food, double service, double ambiance, double overall) {
+        Rating rating = new Rating();
+        rating.food = food;
+        rating.service = service;
+        rating.ambiance = ambiance;
+        rating.overall = overall;
+        review = new Review(user, rating, "good", LocalDateTime.parse("2023-10-10T15:00:00"));
+    }
+
+    @When("submit review")
+    public void submitReview() {
+        submitedReview = false;
+        try {
+            restaurant.addReview(review);
+            submitedReview = true;
+        } catch (Exception e) {
+            submitedReview = false;
+        }
+    }
+
+    @When("submit invalid review")
+    public void submitInvalidReview() {
+        submitedReview = false;
+        try {
+            restaurant.addReview(null);
+            submitedReview = true;
+        } catch (Exception e) {
+            submitedReview = false;
+        }
+    }
+
+    @Then("the review should be submit successfully")
+    public void theReviewShouldBeSubmitSuccessfully() {
+        assertTrue(submitedReview);
+        assertFalse(restaurant.getReviews().isEmpty());
+        assertTrue(restaurant.getReviews().contains(review));
+    }
+
+    @Then("the review should not be submit successfully")
+    public void theReviewShouldNotBeSubmitSuccessfully() {
+        assertFalse(submitedReview);
+    }
+
+    @Then("rating overall at index {int} must be {double}")
+    public void inGivenIndexRatingOverallMustBe(int index, double overall) {
+        assertEquals(overall, restaurant.getReviews().get(index).getRating().overall);
+    }
+
+    @Then("the in average rating must have food={double} service={double} ambiance={double} overall={double}")
+    public void theAverageValuesMustBe(double food, double service, double ambiance, double overall) {
+        Rating average = restaurant.getAverageRating();
+        assertEquals(food, average.food);
+        assertEquals(service, average.service);
+        assertEquals(ambiance, average.ambiance);
+        assertEquals(overall, average.overall);
+
     }
 }

@@ -1,5 +1,6 @@
 package mizdooni.model;
 
+import javax.management.RuntimeErrorException;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +44,9 @@ public class Restaurant {
     }
 
     synchronized public void addReview(Review review) {
+        if (review == null) {
+           throw new RuntimeException("review must has valid value");
+        }
         for (Review r : reviews) {
             if (r.getUser().equals(review.getUser())) {
                 reviews.remove(r);
