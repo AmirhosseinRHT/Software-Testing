@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @CucumberContextConfiguration
-@SpringBootTest(classes = MizdooniApplication.class)
+//@SpringBootTest(classes = MizdooniApplication.class)
 public class UserScenarioTest {
 
     private User user;
