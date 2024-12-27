@@ -82,7 +82,6 @@ class RestaurantTest {
             assertEquals(lastAddedTable.getSeatsNumber(), lastTableInRestaurant.getSeatsNumber());
         }
     }
-
     @Test
     void testGetTable() {
         restaurant.addTable(table1);

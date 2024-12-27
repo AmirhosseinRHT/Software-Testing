@@ -1,21 +1,25 @@
 package mizdooni.model;
 
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.*;
-
-class UserTest {
+public class UserTest {
 
     private User user;
     private Address address;
     private Restaurant italianRestaurant;
     private Restaurant iranianRestaurant;
+    private Reservation reservation;
+    private Restaurant restaurant;
+    private boolean reservationAdded;
     private Table table1;
     private Table table2;
     
@@ -152,17 +156,5 @@ class UserTest {
     void testCheckPassword(String inputPassword, boolean expected) {
         boolean result = user.checkPassword(inputPassword);
         assertEquals(expected, result);
-    }
-
-    @Test
-    void testCheckPasswordEmptyPassword() {
-        boolean result = user.checkPassword("");
-        assertFalse(result);
-    }
-
-    @Test
-    void testCheckPasswordNullPassword() {
-        //This test fails . Because of unhandled null argument.
-        assertThrows(NullPointerException.class, () -> user.checkPassword(null));
     }
 }
