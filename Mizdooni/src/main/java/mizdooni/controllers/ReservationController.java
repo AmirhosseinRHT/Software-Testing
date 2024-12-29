@@ -111,8 +111,6 @@ public class ReservationController {
     @PostMapping("/reserves/cancel/{reservationNumber}")
     public Response cancelReservation(@PathVariable int reservationNumber) {
         try {
-//            if(reservationNumber < 1)
-//                throw new Exception();
             reserveService.cancelReservation(reservationNumber);
             return Response.ok("reservation cancelled");
         } catch (Exception ex) {

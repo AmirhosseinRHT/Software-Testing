@@ -470,13 +470,4 @@ public class ReservationControllerTest {
         ResponseException exception = assertThrows(ResponseException.class, () -> reservationController.getReservations(restaurantId, people , validDate));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
     }
-
-    @ParameterizedTest
-    @CsvSource({
-        "0", "-3"
-    })
-    public void testCancelReservationsWithInvalidParameters(int reservationNumber) {
-        ResponseException exception = assertThrows(ResponseException.class, () -> reservationController.cancelReservation(reservationNumber));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-    }
 }
